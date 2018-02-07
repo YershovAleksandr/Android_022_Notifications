@@ -59,8 +59,7 @@ public class TestFrontEndActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(TestFrontEndActivity.this,
-						MainActivity.class));
+				startActivity(new Intent(TestFrontEndActivity.this, MainActivity.class));
 			}
 		});
 
@@ -77,14 +76,10 @@ public class TestFrontEndActivity extends Activity {
 			BufferedReader in = null;
 
 			try {
-				out = new PrintWriter(new BufferedWriter(
-						new OutputStreamWriter(openFileOutput(
-								MainActivity.TWEET_FILENAME,
-								Context.MODE_PRIVATE))));
+				out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(openFileOutput(MainActivity.TWEET_FILENAME,	Context.MODE_PRIVATE))));
 
 				for (int resId : MainActivity.sRawTextFeedIds) {
-					in = new BufferedReader(new InputStreamReader(
-							getResources().openRawResource(resId)));
+					in = new BufferedReader(new InputStreamReader(getResources().openRawResource(resId)));
 
 					String line;
 					StringBuffer buffer = new StringBuffer();

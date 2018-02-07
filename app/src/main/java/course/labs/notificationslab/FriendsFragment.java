@@ -16,8 +16,7 @@ public class FriendsFragment extends ListFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setListAdapter(new ArrayAdapter<String>(getActivity(),
-				android.R.layout.simple_list_item_1, MainActivity.FRIENDS_NAMES));
+		setListAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, MainActivity.FRIENDS_NAMES));
 	}
 
 	@Override
@@ -29,8 +28,7 @@ public class FriendsFragment extends ListFragment {
 		try {
 			mCallback = (SelectionListener) activity;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement SelectionListener");
+			throw new ClassCastException(activity.toString() + " must implement SelectionListener");
 		}
 	}
 

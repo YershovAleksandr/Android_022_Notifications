@@ -23,8 +23,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements SelectionListener,
-		DownloadFinishedListener {
+public class MainActivity extends Activity implements SelectionListener, DownloadFinishedListener {
 
 	private static final String TAG_NAME = "name";
 	private static final String TAG_USER = "user";
@@ -38,15 +37,13 @@ public class MainActivity extends Activity implements SelectionListener,
 	static final String TAG_FRIEND_RES_IDS = "friends";
 
 	public static final String TWEET_FILENAME = "tweets.txt";
-	public final static String[] FRIENDS_NAMES = { "taylorswift13",
-			"msrebeccablack", "ladygaga" };
+	public final static String[] FRIENDS_NAMES = { "taylorswift13", "msrebeccablack", "ladygaga" };
 	public static final int IS_ALIVE = Activity.RESULT_FIRST_USER;
 	public static final String DATA_REFRESHED_ACTION = "course.labs.notificationslabnew.DATA_REFRESHED";
 	private static final String TAG = "Lab-Notifications";
 
 	// Raw feed file IDs used to reference stored tweet data
-	public static final ArrayList<Integer> sRawTextFeedIds = new ArrayList<Integer>(
-			Arrays.asList(R.raw.tswift, R.raw.rblack, R.raw.lgaga));
+	public static final ArrayList<Integer> sRawTextFeedIds = new ArrayList<Integer>(Arrays.asList(R.raw.tswift, R.raw.rblack, R.raw.lgaga));
 
 	private FragmentManager mFragmentManager;
 	private FriendsFragment mFriendsFragment;
@@ -57,6 +54,7 @@ public class MainActivity extends Activity implements SelectionListener,
 	private boolean mIsFresh;
 	private BroadcastReceiver mRefreshReceiver;
 	private static final long TWO_MIN = 2 * 60 * 1000;
+	//private static final long TWO_MIN = 2 ;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,14 +76,14 @@ public class MainActivity extends Activity implements SelectionListener,
 		installFriendsFragment();
 
 		// The feed is fresh if it was downloaded less than 2 minutes ago
-		mIsFresh = (System.currentTimeMillis() - getFileStreamPath(
-				TWEET_FILENAME).lastModified()) < TWO_MIN;
+		mIsFresh = (System.currentTimeMillis() - getFileStreamPath(TWEET_FILENAME).lastModified()) < TWO_MIN;
 		if (!mIsFresh) {
 			installDownloaderTaskFragment();
 
-			// TODO: Show a Toast message displaying
+			// DO: Show a Toast message displaying
 			// R.string.download_in_progress string
 
+			Toast.makeText(getApplicationContext(), getResources().getText(R.string.download_in_progress_string), Toast.LENGTH_SHORT).show();
 
 			
 			
@@ -100,7 +98,9 @@ public class MainActivity extends Activity implements SelectionListener,
 					// Let sender know that the Intent was received
 					// by setting result code to MainActivity.IS_ALIVE
 
-
+					if (mRefreshReceiver.isOrderedBroadcast()){
+						setResultCode(MainActivity.IS_ALIVE);
+					}
 					
 					
 					
@@ -124,8 +124,7 @@ public class MainActivity extends Activity implements SelectionListener,
 
 		// Give Fragment to the FragmentManager
 		FragmentTransaction transaction = mFragmentManager.beginTransaction();
-		transaction.replace(R.id.fragment_container, mFriendsFragment,
-				TAG_FRIENDS_FRAGMENT);
+		transaction.replace(R.id.fragment_container, mFriendsFragment, TAG_FRIENDS_FRAGMENT);
 		transaction.commit();
 	}
 
@@ -141,8 +140,7 @@ public class MainActivity extends Activity implements SelectionListener,
 		mDownloaderFragment.setArguments(args);
 
 		// Give Fragment to the FragmentManager
-		mFragmentManager.beginTransaction()
-				.add(mDownloaderFragment, TAG_DOWNLOADER_FRAGMENT).commit();
+		mFragmentManager.beginTransaction().add(mDownloaderFragment, TAG_DOWNLOADER_FRAGMENT).commit();
 	}
 
 	// Register the BroadcastReceiver
@@ -150,24 +148,31 @@ public class MainActivity extends Activity implements SelectionListener,
 	protected void onResume() {
 		super.onResume();
 
-		// TODO:
+		// DO:
 		// Register the BroadcastReceiver to receive a
 		// DATA_REFRESHED_ACTION broadcast
 
-		
-		
-		
+		Log.i("X42", "resume");
+
+		IntentFilter intentfilter = new IntentFilter(DATA_REFRESHED_ACTION);
+
+		registerReceiver(mRefreshReceiver, intentfilter);
+
 	}
 
 	@Override
 	protected void onPause() {
 
-		// TODO:
+		Log.i("X42", "pause");
+		// DO:
 		// Unregister the BroadcastReceiver if it has been registered
 		// Note: check that mRefreshReceiver is not null before attempting to
 		// unregister in order to work around an Instrumentation issue
 
-
+		if (mRefreshReceiver != null){
+			unregisterReceiver(mRefreshReceiver);
+			mRefreshReceiver = null;
+		}
 		
 		
 		
@@ -224,8 +229,7 @@ public class MainActivity extends Activity implements SelectionListener,
 
 		// Give Fragment to the FragmentManager
 		FragmentTransaction transaction = mFragmentManager.beginTransaction();
-		transaction.replace(R.id.fragment_container, mFeedFragment,
-				TAG_FEED_FRAGMENT);
+		transaction.replace(R.id.fragment_container, mFeedFragment,	TAG_FEED_FRAGMENT);
 		transaction.addToBackStack(null);
 		transaction.commit();
 	}
@@ -233,46 +237,33 @@ public class MainActivity extends Activity implements SelectionListener,
 	@Override
 	protected void onSaveInstanceState(Bundle savedInstanceState) {
 		if (null != mFriendsFragment) {
-			savedInstanceState.putString(TAG_FRIENDS_FRAGMENT,
-					mFriendsFragment.getTag());
+			savedInstanceState.putString(TAG_FRIENDS_FRAGMENT, mFriendsFragment.getTag());
 		}
 		if (null != mFeedFragment) {
-			savedInstanceState.putString(TAG_FEED_FRAGMENT,
-					mFeedFragment.getTag());
+			savedInstanceState.putString(TAG_FEED_FRAGMENT, mFeedFragment.getTag());
 		}
 		if (null != mDownloaderFragment) {
-			savedInstanceState.putString(TAG_DOWNLOADER_FRAGMENT,
-					mDownloaderFragment.getTag());
+			savedInstanceState.putString(TAG_DOWNLOADER_FRAGMENT, mDownloaderFragment.getTag());
 		}
-		savedInstanceState.putBoolean(TAG_IS_DATA_AVAILABLE,
-				mIsInteractionEnabled);
+		savedInstanceState.putBoolean(TAG_IS_DATA_AVAILABLE, mIsInteractionEnabled);
 		savedInstanceState.putStringArray(TAG_PROCESSED_FEEDS, mFormattedFeeds);
 
 		super.onSaveInstanceState(savedInstanceState);
-
 	}
 
 	// Restore saved instance state
 	private void restoreState(Bundle savedInstanceState) {
 
 		// Fragments tags were saved in onSavedInstanceState
-		mFriendsFragment = (FriendsFragment) mFragmentManager
-				.findFragmentByTag(savedInstanceState
-						.getString(TAG_FRIENDS_FRAGMENT));
+		mFriendsFragment = (FriendsFragment) mFragmentManager.findFragmentByTag(savedInstanceState.getString(TAG_FRIENDS_FRAGMENT));
 
-		mFeedFragment = (FeedFragment) mFragmentManager
-				.findFragmentByTag(savedInstanceState
-						.getString(TAG_FEED_FRAGMENT));
+		mFeedFragment = (FeedFragment) mFragmentManager.findFragmentByTag(savedInstanceState.getString(TAG_FEED_FRAGMENT));
 
-		mDownloaderFragment = (DownloaderTaskFragment) mFragmentManager
-				.findFragmentByTag(savedInstanceState
-						.getString(TAG_DOWNLOADER_FRAGMENT));
+		mDownloaderFragment = (DownloaderTaskFragment) mFragmentManager.findFragmentByTag(savedInstanceState.getString(TAG_DOWNLOADER_FRAGMENT));
 
-		mIsInteractionEnabled = savedInstanceState
-				.getBoolean(TAG_IS_DATA_AVAILABLE);
+		mIsInteractionEnabled = savedInstanceState.getBoolean(TAG_IS_DATA_AVAILABLE);
 		if (mIsInteractionEnabled) {
-			mFormattedFeeds = savedInstanceState
-					.getStringArray(TAG_PROCESSED_FEEDS);
+			mFormattedFeeds = savedInstanceState.getStringArray(TAG_PROCESSED_FEEDS);
 		}
 	}
 
@@ -295,8 +286,7 @@ public class MainActivity extends Activity implements SelectionListener,
 			for (int j = 0; j < tmp.length(); j++) {
 				try {
 					tweet = tmp.getJSONObject(j).getString(TAG_TEXT);
-					JSONObject user = (JSONObject) tmp.getJSONObject(j).get(
-							TAG_USER);
+					JSONObject user = (JSONObject) tmp.getJSONObject(j).get(TAG_USER);
 					name = user.getString(TAG_NAME);
 				} catch (JSONException e) {
 					e.printStackTrace();
